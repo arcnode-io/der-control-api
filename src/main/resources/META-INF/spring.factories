@@ -1,0 +1,4 @@
+# Runs before the context refreshes — lifts cfg.yml / DER_CONTROL_URL into the Environment.
+org.springframework.boot.EnvironmentPostProcessor=\
+io.arcnode.dercontrol.Config$Loader,\
+io.arcnode.dercontrol.DataSourceUrl$Loader

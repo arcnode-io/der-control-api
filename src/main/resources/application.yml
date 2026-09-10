@@ -1,0 +1,33 @@
+# Spring-native wiring only. cfg.yml is the source of truth for non-secrets (via Config.Loader,
+# which also feeds server.port / server.address / logging.level.root directly). Secrets come from
+# the environment. Never add config values here that belong in cfg.yml.
+spring:
+  application:
+    name: der-control-api
+  threads:
+    virtual:
+      enabled: true
+  # local/CI default — own postgres on postgresHost. beta/cloud overrides all three via
+  # DER_CONTROL_URL (DataSourceUrl.Loader), a libpq URL platform-api provisions per deployment.
+  datasource:
+    url: jdbc:postgresql://${app.postgresHost}:5432/postgres
+    username: postgres
+    password: ${POSTGRES_PASSWORD:}
+  jpa:
+    hibernate:
+      ddl-auto: update
+    open-in-view: false
+
+server:
+  port: ${app.port}
+  address: ${app.host}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui
