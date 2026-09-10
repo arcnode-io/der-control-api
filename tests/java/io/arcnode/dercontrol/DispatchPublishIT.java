@@ -89,6 +89,7 @@ class DispatchPublishIT extends AbstractBrokerIT {
     rest.post()
         .uri("/der-events")
         .contentType(MediaType.APPLICATION_JSON)
+        .header("X-SSL-Client-Cert", TestCerts.HEADER_VALUE)
         .body(VALID_BODY.formatted(mrid))
         .exchange()
         .expectStatus()

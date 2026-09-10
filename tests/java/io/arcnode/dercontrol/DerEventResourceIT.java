@@ -46,6 +46,7 @@ class DerEventResourceIT extends AbstractBrokerIT {
     rest.post()
         .uri("/der-events")
         .contentType(MediaType.APPLICATION_JSON)
+        .header("X-SSL-Client-Cert", TestCerts.HEADER_VALUE)
         .body(VALID_BODY.formatted(mrid))
         .exchange()
         .expectStatus()
@@ -54,7 +55,9 @@ class DerEventResourceIT extends AbstractBrokerIT {
         .jsonPath("$.mrid")
         .isEqualTo(mrid)
         .jsonPath("$.targetActivePowerW")
-        .isEqualTo(-1500000.0);
+        .isEqualTo(-1500000.0)
+        .jsonPath("$.submittedByLfdi")
+        .isEqualTo(TestCerts.LFDI);
 
     // Assert: fetch
     rest.get()
@@ -74,7 +77,24 @@ class DerEventResourceIT extends AbstractBrokerIT {
     rest.post()
         .uri("/der-events")
         .contentType(MediaType.APPLICATION_JSON)
+        .header("X-SSL-Client-Cert", TestCerts.HEADER_VALUE)
         .body("{\"mrid\":\"mrid-bad\",\"eventStatus\":\"ACTIVE\"}")
+        .exchange()
+        .expectStatus()
+        .isBadRequest();
+  }
+
+  @Test
+  void rejectsMissingClientCertHeaderWith400() {
+    // Arrange: der-control-ingress always sets this in prod — a request without it never got
+    // through the gateway's own cert check, so this can only happen hitting the app directly.
+    String mrid = "mrid-no-cert";
+
+    // Act / Assert
+    rest.post()
+        .uri("/der-events")
+        .contentType(MediaType.APPLICATION_JSON)
+        .body(VALID_BODY.formatted(mrid))
         .exchange()
         .expectStatus()
         .isBadRequest();
@@ -92,6 +112,7 @@ class DerEventResourceIT extends AbstractBrokerIT {
     rest.post()
         .uri("/der-events")
         .contentType(MediaType.APPLICATION_JSON)
+        .header("X-SSL-Client-Cert", TestCerts.HEADER_VALUE)
         .body(VALID_BODY.formatted(mrid))
         .exchange()
         .expectStatus()

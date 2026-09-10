@@ -6,6 +6,7 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
+import io.arcnode.dercontrol.TestCerts;
 import io.arcnode.dercontrol.derevent.dto.DerControlRequest;
 import io.arcnode.dercontrol.derevent.dto.DerEventResponse;
 import io.arcnode.dercontrol.dispatch.DispatchPublisher;
@@ -56,12 +57,14 @@ class DerEventServiceTest {
     given(repository.save(any(DerEvent.class))).willAnswer(inv -> withId(1, inv.getArgument(0)));
 
     // Act
-    DerEventResponse result = service().ingest(request("mrid-1", DerControlStatus.ACTIVE));
+    DerEventResponse result =
+        service().ingest(request("mrid-1", DerControlStatus.ACTIVE), TestCerts.HEADER_VALUE);
 
     // Assert
     assertThat(result.mrid()).isEqualTo("mrid-1");
     assertThat(result.status()).isEqualTo(DerControlStatus.ACTIVE);
     assertThat(result.targetActivePowerW()).isEqualTo(-1_000_000.0);
+    assertThat(result.submittedByLfdi()).isEqualTo(TestCerts.LFDI);
     ArgumentCaptor<DerEvent> published = ArgumentCaptor.forClass(DerEvent.class);
     verify(publisher).publish(published.capture());
     assertThat(published.getValue().getMrid()).isEqualTo("mrid-1");
@@ -74,15 +77,24 @@ class DerEventServiceTest {
         withId(
             1,
             new DerEvent(
-                "mrid-1", DerControlStatus.ACTIVE, START, 3600L, -1_000_000.0, true, "{}"));
+                "mrid-1",
+                DerControlStatus.ACTIVE,
+                START,
+                3600L,
+                -1_000_000.0,
+                true,
+                "{}",
+                "old-lfdi"));
     given(repository.findByMrid("mrid-1")).willReturn(Optional.of(existing));
     given(repository.save(any(DerEvent.class))).willAnswer(inv -> inv.getArgument(0));
 
     // Act
-    DerEventResponse result = service().ingest(request("mrid-1", DerControlStatus.CANCELLED));
+    DerEventResponse result =
+        service().ingest(request("mrid-1", DerControlStatus.CANCELLED), TestCerts.HEADER_VALUE);
 
     // Assert
     assertThat(result.status()).isEqualTo(DerControlStatus.CANCELLED);
+    assertThat(result.submittedByLfdi()).isEqualTo(TestCerts.LFDI);
     verify(repository).save(existing);
   }
 
@@ -90,7 +102,10 @@ class DerEventServiceTest {
   void findByMridReturnsResponseWhenPresent() {
     // Arrange
     DerEvent event =
-        withId(1, new DerEvent("mrid-1", DerControlStatus.ACTIVE, START, 3600L, 500.0, null, "{}"));
+        withId(
+            1,
+            new DerEvent(
+                "mrid-1", DerControlStatus.ACTIVE, START, 3600L, 500.0, null, "{}", "lfdi-1"));
     given(repository.findByMrid("mrid-1")).willReturn(Optional.of(event));
 
     // Act
@@ -118,9 +133,11 @@ class DerEventServiceTest {
   void findByStatusReturnsMatchingEvents() {
     // Arrange
     DerEvent a =
-        withId(1, new DerEvent("a", DerControlStatus.ACTIVE, START, 60L, null, null, "{}"));
+        withId(
+            1, new DerEvent("a", DerControlStatus.ACTIVE, START, 60L, null, null, "{}", "lfdi-a"));
     DerEvent b =
-        withId(2, new DerEvent("b", DerControlStatus.ACTIVE, START, 60L, null, null, "{}"));
+        withId(
+            2, new DerEvent("b", DerControlStatus.ACTIVE, START, 60L, null, null, "{}", "lfdi-b"));
     given(repository.findByStatus(DerControlStatus.ACTIVE)).willReturn(List.of(a, b));
 
     // Act

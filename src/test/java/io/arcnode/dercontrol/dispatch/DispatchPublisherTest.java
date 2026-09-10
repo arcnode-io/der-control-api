@@ -50,7 +50,7 @@ class DispatchPublisherTest {
   }
 
   private static DerEvent event(Double targetW, Boolean energize, DerControlStatus status) {
-    return new DerEvent("mrid-1", status, FIXED, 3600L, targetW, energize, "{}");
+    return new DerEvent("mrid-1", status, FIXED, 3600L, targetW, energize, "{}", "lfdi-test");
   }
 
   @Test

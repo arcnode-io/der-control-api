@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -18,7 +19,9 @@ import org.springframework.web.server.ResponseStatusException;
 
 /**
  * REST endpoints for utility/aggregator DERControl ingest. Thin — all logic lives in {@link
- * DerEventService}.
+ * DerEventService}. {@code X-SSL-Client-Cert} is set by the der-control-ingress gateway, which
+ * already rejected anything without a CA-signed cert — this only derives identity for audit, it
+ * doesn't re-check trust.
  */
 @Tag(name = "der-events")
 @RestController
@@ -33,8 +36,10 @@ public class DerEventController {
 
   @PostMapping
   @ResponseStatus(HttpStatus.CREATED)
-  public DerEventResponse ingest(@Valid @RequestBody DerControlRequest request) {
-    return service.ingest(request);
+  public DerEventResponse ingest(
+      @Valid @RequestBody DerControlRequest request,
+      @RequestHeader("X-SSL-Client-Cert") String clientCertHeader) {
+    return service.ingest(request, clientCertHeader);
   }
 
   @GetMapping("/{mrid}")

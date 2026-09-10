@@ -269,6 +269,19 @@ Domain MCP = external, standards-scoped vocabulary and reference knowledge; cano
 - `@RestController` + `@RequestMapping`; `@ResponseStatus` or `ResponseEntity`; errors via `ResponseStatusException` → RFC 7807 `ProblemDetail`.
 - OpenAPI: springdoc annotations (`@Tag`, `@Operation`) → `/swagger-ui`, `/v3/api-docs`.
 
+### Auth
+- IEEE 2030.5 §6.3.4 mandates mutual TLS with X.509 client certs. This app never terminates TLS or
+  checks cert trust itself — `der-control-ingress` (an nginx gateway in platform-api) does that,
+  forwarding the verified cert as `X-SSL-Client-Cert` (URL-encoded PEM, nginx's
+  `$ssl_client_escaped_cert`). `ClientIdentity.fromHeaderValue(...)` url-decodes, parses the X.509
+  cert, and derives LFDI/SFDI (SHA-256 of the cert's DER bytes, per spec) — identity for audit, not
+  a trust check.
+- `POST /der-events` requires `X-SSL-Client-Cert`; missing it is a 400 (`@RequestHeader` with no
+  `required = false`) — in prod that can only happen hitting the app directly, bypassing the
+  gateway. `DerEvent.submittedByLfdi` persists which device/aggregator sent each event.
+- Per-mRID authorization (reject an LFDI not allowlisted for a given mRID/site) is NOT implemented
+  — needs an allowlist source that doesn't exist yet (maybe `der-common-ca`, not yet built).
+
 ### Config
 - `cfg.yml` (`local` / `beta`, selected by `$ENV`) is the source of truth for non-secrets. `Config.Loader` (an `EnvironmentPostProcessor` in `META-INF/spring.factories`, registered as `io.arcnode.dercontrol.Config$Loader`) lifts it into the environment under `app.*`; `Config` is a `@Validated @ConfigurationProperties(prefix = "app")` record with `LogLevel` and `Loader` nested inside it — one file, Java only requires one *public top-level* type per file.
 - `DataSourceUrl.Loader` (registered as `io.arcnode.dercontrol.DataSourceUrl$Loader`, alongside `Config$Loader`) reads `DER_CONTROL_URL` (a libpq URL platform-api provisions in beta/cloud) and splits it into `spring.datasource.*` — no-op locally, where `cfg.yml`'s `postgresHost` + `POSTGRES_PASSWORD` apply instead.

@@ -52,6 +52,10 @@ public class DerEvent {
   @Column(columnDefinition = "text", nullable = false, updatable = false)
   private String rawPayload;
 
+  /** LFDI of the client cert that submitted this event (IEEE 2030.5 §6.3.4) — audit trail. */
+  @Column(nullable = false)
+  private String submittedByLfdi;
+
   /** JPA-only. */
   protected DerEvent() {
     // JPA instantiates via reflection, never calls this directly
@@ -64,7 +68,8 @@ public class DerEvent {
       long durationSeconds,
       @Nullable Double targetActivePowerW,
       @Nullable Boolean energize,
-      String rawPayload) {
+      String rawPayload,
+      String submittedByLfdi) {
     this.mrid = mrid;
     this.status = status;
     this.intervalStart = intervalStart;
@@ -72,6 +77,7 @@ public class DerEvent {
     this.targetActivePowerW = targetActivePowerW;
     this.energize = energize;
     this.rawPayload = rawPayload;
+    this.submittedByLfdi = submittedByLfdi;
     this.receivedAt = Instant.now();
   }
 
@@ -134,5 +140,13 @@ public class DerEvent {
 
   public String getRawPayload() {
     return rawPayload;
+  }
+
+  public String getSubmittedByLfdi() {
+    return submittedByLfdi;
+  }
+
+  public void setSubmittedByLfdi(String submittedByLfdi) {
+    this.submittedByLfdi = submittedByLfdi;
   }
 }
