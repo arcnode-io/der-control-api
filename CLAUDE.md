@@ -280,7 +280,7 @@ Domain MCP = external, standards-scoped vocabulary and reference knowledge; cano
   `required = false`) — in prod that can only happen hitting the app directly, bypassing the
   gateway. `DerEvent.submittedByLfdi` persists which device/aggregator sent each event.
 - Per-mRID authorization (reject an LFDI not allowlisted for a given mRID/site) is NOT implemented
-  — needs an allowlist source that doesn't exist yet (maybe `der-common-ca`, not yet built).
+  — needs an allowlist source that doesn't exist yet.
 
 ### Config
 - `cfg.yml` (`local` / `beta`, selected by `$ENV`) is the source of truth for non-secrets. `Config.Loader` (an `EnvironmentPostProcessor` in `META-INF/spring.factories`, registered as `io.arcnode.dercontrol.Config$Loader`) lifts it into the environment under `app.*`; `Config` is a `@Validated @ConfigurationProperties(prefix = "app")` record with `LogLevel` and `Loader` nested inside it — one file, Java only requires one *public top-level* type per file.
