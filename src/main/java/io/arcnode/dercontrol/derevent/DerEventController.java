@@ -2,6 +2,8 @@ package io.arcnode.dercontrol.derevent;
 
 import io.arcnode.dercontrol.derevent.dto.DerControlRequest;
 import io.arcnode.dercontrol.derevent.dto.DerEventResponse;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.util.List;
@@ -34,19 +36,34 @@ public class DerEventController {
     this.service = service;
   }
 
+  @Operation(
+      summary = "Ingest a DERControl event",
+      description =
+          "Accepts an IEEE 2030.5 DERControl (mRID, EventStatus, interval, DERControlBase),"
+              + " persists it, and republishes the setpoint onto the arcnode MQTT bus. A"
+              + " re-transmitted mRID (status change, cancellation) updates the existing event"
+              + " rather than duplicating it.")
   @PostMapping
   @ResponseStatus(HttpStatus.CREATED)
   public DerEventResponse ingest(
       @Valid @RequestBody DerControlRequest request,
-      @RequestHeader("X-SSL-Client-Cert") String clientCertHeader) {
+      @Parameter(
+              description =
+                  "Verified client cert forwarded by der-control-ingress (URL-encoded PEM);"
+                      + " device identity (LFDI/SFDI) is derived from it for audit.",
+              hidden = true)
+          @RequestHeader("X-SSL-Client-Cert")
+          String clientCertHeader) {
     return service.ingest(request, clientCertHeader);
   }
 
+  @Operation(summary = "Fetch one persisted DERControl event by mRID")
   @GetMapping("/{mrid}")
   public DerEventResponse findOne(@PathVariable String mrid) {
     return service.findByMrid(mrid).orElseThrow(DerEventController::notFound);
   }
 
+  @Operation(summary = "List persisted DERControl events by lifecycle status")
   @GetMapping
   public List<DerEventResponse> findByStatus(@RequestParam DerControlStatus status) {
     return service.findByStatus(status);
