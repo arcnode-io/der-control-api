@@ -28,7 +28,7 @@ public class Application {
     return new OpenAPI()
         .info(
             new Info()
-                .title("der-control-api")
+                .title("ems-der-control-api")
                 .version("1.0.0-beta")
                 .description("IEEE 2030.5 DERControl intake"));
   }

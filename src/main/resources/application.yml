@@ -3,7 +3,7 @@
 # the environment. Never add config values here that belong in cfg.yml.
 spring:
   application:
-    name: der-control-api
+    name: ems-der-control-api
   threads:
     virtual:
       enabled: true

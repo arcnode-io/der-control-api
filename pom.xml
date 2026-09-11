@@ -12,9 +12,9 @@
   </parent>
 
   <groupId>io.arcnode</groupId>
-  <artifactId>der-control-api</artifactId>
+  <artifactId>ems-der-control-api</artifactId>
   <version>1.0.0-beta</version>
-  <name>der-control-api</name>
+  <name>ems-der-control-api</name>
   <description>Utility/aggregator DER dispatch intake — IEEE 2030.5 DERControl → MQTT setpoints</description>
 
   <properties>

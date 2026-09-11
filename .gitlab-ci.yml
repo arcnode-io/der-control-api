@@ -42,8 +42,8 @@ publish:
   stage: publish
   script:
     - aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin public.ecr.aws
-    - docker build -t public.ecr.aws/y1d2j6a8/der-control-api .
-    - docker push public.ecr.aws/y1d2j6a8/der-control-api
+    - docker build -t public.ecr.aws/y1d2j6a8/ems-der-control-api .
+    - docker push public.ecr.aws/y1d2j6a8/ems-der-control-api
 
 mirror:
   stage: mirror
@@ -52,6 +52,6 @@ mirror:
     GIT_DEPTH: 0
   script:
     - git checkout -B main
-    - git push --mirror git@github.com:arcnode-io/der-control-api.git
+    - git push --mirror git@github.com:arcnode-io/ems-der-control-api.git
   only:
     - main

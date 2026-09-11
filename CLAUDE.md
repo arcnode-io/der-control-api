@@ -354,7 +354,7 @@ Park that branch, keep working everything else.
 | 🔧 mechanical-engineer | edp-interface-plates |
 | 🏗 platform-engineer | platform-api, platform-ems-iso |
 | 🖥️ frontend-engineer | ems-hmi |
-| ⚙️ backend-engineer | ems-device-api, der-control-api |
+| ⚙️ backend-engineer | ems-device-api, ems-der-control-api |
 | 🏭 ics-engineer | ems-industrial-gateway, ems-industrial-fixtures |
 | 🤖 ai-engineer | ems-analyst-agent, ems-analyst-mcp, ems-analyst-server |
 | 📊 ml-engineer | ems-analyst-model |
